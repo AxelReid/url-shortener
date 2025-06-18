@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { UrlShortenerService } from './url-shortener.service';
-import { CreateUrlShortenerDto } from './dto/create-url-shortener.dto';
-import { UpdateUrlShortenerDto } from './dto/update-url-shortener.dto';
+import { Request, Response } from 'express';
+import { ShortenUrlBodyDto } from './dto/shorten-url-body.dto';
 
-@Controller('url-shortener')
+@Controller('url')
 export class UrlShortenerController {
-  constructor(private readonly urlShortenerService: UrlShortenerService) {}
+  constructor(private readonly service: UrlShortenerService) {}
+
+  @Get(':shortUrl/info')
+  getInfo(@Param('shortUrl') shortUrl: string) {
+    return this.service.getInfo(shortUrl);
+  }
+
+  @Get(':shortUrl/analytics')
+  getAnalytics(@Param('shortUrl') shortUrl: string) {
+    return this.service.getAnalytics(shortUrl);
+  }
+
+  @Get(':shortUrl')
+  redirect(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param('shortUrl') shortUrl: string,
+  ) {
+    return this.service.redirect(req, res, shortUrl);
+  }
 
   @Post()
-  create(@Body() createUrlShortenerDto: CreateUrlShortenerDto) {
-    return this.urlShortenerService.create(createUrlShortenerDto);
+  shorten(@Body() body: ShortenUrlBodyDto) {
+    return this.service.shorten(body);
   }
 
-  @Get()
-  findAll() {
-    return this.urlShortenerService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.urlShortenerService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUrlShortenerDto: UpdateUrlShortenerDto) {
-    return this.urlShortenerService.update(+id, updateUrlShortenerDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.urlShortenerService.remove(+id);
+  @Delete(':shortUrl')
+  delete(@Param('shortUrl') shortUrl: string) {
+    return `Deleting "${shortUrl}"`;
   }
 }
